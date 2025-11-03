@@ -9,7 +9,7 @@ import (
 
 func main() {
 	contacts := make(map[int]contact.Contact)
-
+	nextID := 1
 	for {
 		fmt.Println("\n--- MINI CRM ---")
 		fmt.Println("1. Ajouter un contact")
@@ -22,20 +22,21 @@ func main() {
 
 		switch choice {
 		case "1":
-			id, err := utils.ReadInt("ID : ")
-			if err != nil {
-				fmt.Println("Erreur : ID invalide.")
-				continue
-			}
 			nom := utils.ReadString("Nom : ")
 			email := utils.ReadString("Email : ")
 
-			newContact := contact.Contact{ID: id, Nom: nom, Email: email}
-			fmt.Println("-------v-v-v-------")
+			// ID automatique
+			newContact := contact.Contact{
+				ID:    nextID,
+				Nom:   nom,
+				Email: email,
+			}
+
 			if err := contact.AddContact(contacts, newContact); err != nil {
 				fmt.Println("Erreur :", err)
 			} else {
-				fmt.Println("Contact ajouté avec succès.")
+				fmt.Printf("Contact ajouté avec succès (ID: %d)\n", nextID)
+				nextID++ 
 			}
 
 		case "2":
