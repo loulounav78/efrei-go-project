@@ -1,18 +1,63 @@
 package contact
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
 	"sort"
+	"strings"
 )
 
+// Contact représente un contact client
 type Contact struct {
 	ID    int
 	Nom   string
 	Email string
 }
 
-// Ajouter un contact à la map
-func AddContact(contacts map[int]Contact, c Contact) error {
+// NewContact est un constructeur qui crée et valide un contact
+func NewContact(id int, nom, email string) (*Contact, error) {
+	nom = strings.TrimSpace(nom)
+	email = strings.TrimSpace(email)
+
+	// Vérification du nom
+	if nom == "" {
+		return nil, errors.New("le nom ne peut pas être vide")
+	}
+	if !isValidName(nom) {
+		return nil, errors.New("le nom contient des caractères non valides (lettres et espaces uniquement)")
+	}
+
+	// Vérification de l'email
+	if !isValidEmail(email) {
+		return nil, errors.New("l'email n'est pas valide")
+	}
+
+	return &Contact{
+		ID:    id,
+		Nom:   nom,
+		Email: email,
+	}, nil
+}
+
+// isValidEmail vérifie que l'email est au bon format
+func isValidEmail(email string) bool {
+	re := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+	return re.MatchString(email)
+}
+
+// isValidName vérifie que le nom contient uniquement lettres, espaces, tirets
+func isValidName(name string) bool {
+	re := regexp.MustCompile(`^[a-zA-ZÀ-ÿ\s\-]+$`)
+	return re.MatchString(name)
+}
+
+//
+// --- Méthodes associées ---
+//
+
+// Ajouter un contact à la collection
+func (c *Contact) Add(contacts map[int]*Contact) error {
 	if _, exists := contacts[c.ID]; exists {
 		return fmt.Errorf("un contact avec l'ID %d existe déjà", c.ID)
 	}
@@ -20,52 +65,52 @@ func AddContact(contacts map[int]Contact, c Contact) error {
 	return nil
 }
 
-// Lister tous les contacts
-func ListContacts(contacts map[int]Contact) {
-	if len(contacts) == 0 {
-		fmt.Println("Aucun contact enregistré.")
-		return
+// Met à jour les informations du contact
+func (c *Contact) Update(nom, email string) error {
+	if nom != "" {
+		if !isValidName(nom) {
+			return errors.New("le nouveau nom contient des caractères non valides")
+		}
+		c.Nom = nom
 	}
-
-	fmt.Println("Liste des contacts :")
-
-	// 1. Extraire toutes les clés
-	var ids []int
-	for id := range contacts {
-		ids = append(ids, id)
+	if email != "" {
+		if !isValidEmail(email) {
+			return errors.New("le nouvel email n'est pas valide")
+		}
+		c.Email = email
 	}
-
-	// 2. Trier les IDs
-	sort.Ints(ids)
-
-	// 3. Afficher dans l’ordre
-	for _, id := range ids {
-		c := contacts[id]
-		fmt.Printf("ID: %d | Nom: %s | Email: %s\n", c.ID, c.Nom, c.Email)
-	}
+	return nil
 }
 
-// Supprimer un contact
-func DeleteContact(contacts map[int]Contact, id int) error {
-	if _, ok := contacts[id]; !ok { // <-- comma ok idiom
+//
+// --- Fonctions globales (utilisent la map) ---
+//
+
+// Supprimer un contact par ID
+func DeleteContact(contacts map[int]*Contact, id int) error {
+	if _, ok := contacts[id]; !ok {
 		return fmt.Errorf("aucun contact avec l'ID %d", id)
 	}
 	delete(contacts, id)
 	return nil
 }
 
-// Mettre à jour un contact
-func UpdateContact(contacts map[int]Contact, id int, nom, email string) error {
-	c, ok := contacts[id]
-	if !ok {
-		return fmt.Errorf("aucun contact avec l'ID %d", id)
+// Lister tous les contacts triés par ID
+func ListContacts(contacts map[int]*Contact) {
+	if len(contacts) == 0 {
+		fmt.Println("Aucun contact enregistré.")
+		return
 	}
-	if nom != "" {
-		c.Nom = nom
+
+	var ids []int
+	for id := range contacts {
+		ids = append(ids, id)
 	}
-	if email != "" {
-		c.Email = email
+	sort.Ints(ids)
+
+	fmt.Println("Liste des contacts :")
+	for _, id := range ids {
+		c := contacts[id]
+		fmt.Printf("ID: %d | Nom: %s | Email: %s\n", c.ID, c.Nom, c.Email)
 	}
-	contacts[id] = c
-	return nil
 }

@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/loulounav78/efrei-go-project/utils"
 	"os"
+
 	"github.com/loulounav78/efrei-go-project/contact"
+	"github.com/loulounav78/efrei-go-project/utils"
 )
 
 func main() {
-	contacts := make(map[int]contact.Contact)
-	nextID := 1
+	contacts := make(map[int]*contact.Contact)
+	nextID := 1 // ID auto-incrémenté
+
 	for {
 		fmt.Println("\n--- MINI CRM ---")
 		fmt.Println("1. Ajouter un contact")
@@ -17,7 +19,7 @@ func main() {
 		fmt.Println("3. Supprimer un contact")
 		fmt.Println("4. Mettre à jour un contact")
 		fmt.Println("5. Quitter")
-		fmt.Println("---------------")
+
 		choice := utils.ReadString("Choisissez une option : ")
 
 		switch choice {
@@ -25,18 +27,17 @@ func main() {
 			nom := utils.ReadString("Nom : ")
 			email := utils.ReadString("Email : ")
 
-			// ID automatique
-			newContact := contact.Contact{
-				ID:    nextID,
-				Nom:   nom,
-				Email: email,
+			newContact, err := contact.NewContact(nextID, nom, email)
+			if err != nil {
+				fmt.Println("Erreur :", err)
+				continue
 			}
 
-			if err := contact.AddContact(contacts, newContact); err != nil {
+			if err := newContact.Add(contacts); err != nil {
 				fmt.Println("Erreur :", err)
 			} else {
 				fmt.Printf("Contact ajouté avec succès (ID: %d)\n", nextID)
-				nextID++ 
+				nextID++
 			}
 
 		case "2":
@@ -62,12 +63,17 @@ func main() {
 				fmt.Println("Erreur : ID invalide.")
 				continue
 			}
+
+			c, ok := contacts[id]
+			if !ok {
+				fmt.Println("Aucun contact trouvé avec cet ID.")
+				continue
+			}
+
 			nom := utils.ReadString("Nouveau nom (laisser vide pour ne pas changer) : ")
 			email := utils.ReadString("Nouvel email (laisser vide pour ne pas changer) : ")
-
 			fmt.Println("-------v-v-v-------")
-
-			if err := contact.UpdateContact(contacts, id, nom, email); err != nil {
+			if err := c.Update(nom, email); err != nil {
 				fmt.Println("Erreur :", err)
 			} else {
 				fmt.Println("Contact mis à jour.")
