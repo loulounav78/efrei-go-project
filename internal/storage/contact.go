@@ -1,10 +1,9 @@
-package contact
+package storage
 
 import (
 	"errors"
 	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 )
 
@@ -80,37 +79,4 @@ func (c *Contact) Update(nom, email string) error {
 		c.Email = email
 	}
 	return nil
-}
-
-//
-// --- Fonctions globales (utilisent la map) ---
-//
-
-// Supprimer un contact par ID
-func DeleteContact(contacts map[int]*Contact, id int) error {
-	if _, ok := contacts[id]; !ok {
-		return fmt.Errorf("aucun contact avec l'ID %d", id)
-	}
-	delete(contacts, id)
-	return nil
-}
-
-// Lister tous les contacts triés par ID
-func ListContacts(contacts map[int]*Contact) {
-	if len(contacts) == 0 {
-		fmt.Println("Aucun contact enregistré.")
-		return
-	}
-
-	var ids []int
-	for id := range contacts {
-		ids = append(ids, id)
-	}
-	sort.Ints(ids)
-
-	fmt.Println("Liste des contacts :")
-	for _, id := range ids {
-		c := contacts[id]
-		fmt.Printf("ID: %d | Nom: %s | Email: %s\n", c.ID, c.Nom, c.Email)
-	}
 }

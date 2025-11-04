@@ -36,4 +36,4 @@ Un petit projet d'apprentissage en **Golang**, simulant un mini système de gest
 - git clone https://github.com/loulounav78/efrei-go-project.git
 - cd efrei-go-project
 
-- go run .
+- go run cmd/crm/main.go
