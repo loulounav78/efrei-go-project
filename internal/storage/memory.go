@@ -1,17 +1,16 @@
 package storage
 
-import (
-	"fmt"
-	"sort"
-)
+import "fmt"
 
-// Implémentation mémoire
+// MemoryStore est une implémentation CONCRÈTE de l'interface Storer.
+// Elle utilise une map en mémoire pour stocker les données.
+// Elle respecte le contrat Storer car elle possède toutes les méthodes demandées.
 type MemoryStore struct {
 	contacts map[int]*Contact
 	nextID   int
 }
 
-// NewMemoryStore crée un nouveau store vide
+// NewMemoryStore est un "constructeur" qui initialise proprement notre store.
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
 		contacts: make(map[int]*Contact),
@@ -19,52 +18,50 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-// Add ajoute un contact avec un ID automatique
-func (m *MemoryStore) Add(c *Contact) error {
-	c.ID = m.nextID
-	m.contacts[m.nextID] = c
-	m.nextID++
+func (ms *MemoryStore) Add(contact *Contact) error {
+	contact.ID = ms.nextID
+	ms.contacts[contact.ID] = contact
+	ms.nextID++
 	return nil
 }
 
-// Update met à jour un contact existant
-func (m *MemoryStore) Update(id int, nom, email string) error {
-	contact, ok := m.contacts[id]
+func (ms *MemoryStore) GetAll() ([]*Contact, error) {
+	// On crée une slice pour éviter de retourner directement
+	// une référence à la map interne.
+	var allContacts []*Contact
+	for _, c := range ms.contacts {
+		allContacts = append(allContacts, c)
+	}
+	return allContacts, nil
+}
+
+func (ms *MemoryStore) GetByID(id int) (*Contact, error) {
+	contact, ok := ms.contacts[id]
 	if !ok {
-		return fmt.Errorf("aucun contact avec l'ID %d", id)
+		return nil, fmt.Errorf("contact avec l'ID %d non trouvé", id)
 	}
-	return contact.Update(nom, email)
+	return contact, nil
 }
 
-// Delete supprime un contact par ID
-func (m *MemoryStore) Delete(id int) error {
-	if _, ok := m.contacts[id]; !ok {
-		return fmt.Errorf("aucun contact avec l'ID %d", id)
+func (ms *MemoryStore) Update(id int, newName, newEmail string) error {
+	contact, err := ms.GetByID(id)
+	if err != nil {
+		return err // Retourne l'erreur "non trouvé"
 	}
-	delete(m.contacts, id)
+
+	if newName != "" {
+		contact.Name = newName
+	}
+	if newEmail != "" {
+		contact.Email = newEmail
+	}
 	return nil
 }
 
-// List renvoie la liste triée des contacts
-func (m *MemoryStore) List() []*Contact {
-	var list []*Contact
-	var ids []int
-
-	for id := range m.contacts {
-		ids = append(ids, id)
+func (ms *MemoryStore) Delete(id int) error {
+	if _, ok := ms.contacts[id]; !ok {
+		return fmt.Errorf("contact avec l'ID %d non trouvé", id)
 	}
-	sort.Ints(ids)
-
-	for _, id := range ids {
-		list = append(list, m.contacts[id])
-	}
-	return list
-}
-
-// Get renvoie un contact par son ID
-func (m *MemoryStore) Get(id int) (*Contact, error) {
-	if c, ok := m.contacts[id]; ok {
-		return c, nil
-	}
-	return nil, fmt.Errorf("aucun contact avec l'ID %d", id)
+	delete(ms.contacts, id)
+	return nil
 }
