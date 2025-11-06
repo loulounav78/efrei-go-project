@@ -9,17 +9,18 @@ import (
 )
 
 var (
-	store   storage.Storer
+	store storage.Storer
 	rootCmd = &cobra.Command{
 		Use:   "crm",
 		Short: "Mini CRM CLI pour gérer vos contacts",
-		Long:  "Mini CRM complet en Go, utilisant Cobra pour gérer les commandes.",
+		Long:  "Mini CRM complet en Go, utilisant Cobra pour gérer les contacts de manière persistante.",
 	}
 )
 
-// Execute lance la commande racine
 func Execute() {
-	store = storage.NewMemoryStore()
+	// Utilisation automatique du JSONStore
+	store = storage.NewJSONStore("data/contacts.json")
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
