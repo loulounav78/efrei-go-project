@@ -4,9 +4,9 @@ import "fmt"
 
 // Contact est notre structure de données centrale.
 type Contact struct {
-	ID    int
-	Name  string
-	Email string
+	ID    int    `gorm:"primaryKey;autoIncrement"`
+	Name  string `gorm:"not null"`
+	Email string `gorm:"not null"`
 }
 
 // Storer est notre CONTRAT de stockage.

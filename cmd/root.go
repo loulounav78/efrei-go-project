@@ -9,17 +9,33 @@ import (
 )
 
 var (
-	store storage.Storer
-	rootCmd = &cobra.Command{
-		Use:   "crm",
-		Short: "Mini CRM CLI pour gérer vos contacts",
-		Long:  "Mini CRM complet en Go, utilisant Cobra pour gérer les contacts de manière persistante.",
-	}
+	storeType string
+	store     storage.Storer
 )
 
+var rootCmd = &cobra.Command{
+	Use:   "crm",
+	Short: "Mini CRM CLI",
+	Long:  "Mini CRM complet utilisant un système de stockage interchangeable (JSON ou SQLite via GORM).",
+}
+
+func init() {
+	rootCmd.PersistentFlags().StringVar(&storeType, "store", "gorm", "Type de stockage: json | gorm")
+}
+
 func Execute() {
-	// Utilisation automatique du JSONStore
-	store = storage.NewJSONStore("data/contacts.json")
+	switch storeType {
+
+	case "json":
+		store = storage.NewJSONStore("data/contacts.json")
+
+	case "gorm":
+		store = storage.NewGORMStore("data/contacts.db")
+
+	default:
+		fmt.Println("Store inconnu. Utiliser: json ou gorm")
+		os.Exit(1)
+	}
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
