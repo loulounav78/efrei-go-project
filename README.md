@@ -44,7 +44,7 @@ efrei-go-project/
 ## 1. Cloner le projet
 
 ```bash
-git clone <URL_DU_REPO>
+git clone https://github.com/loulounav78/efrei-go-project.git
 cd efrei-go-project
 ```
 
@@ -264,14 +264,6 @@ Puis :
 
 ---
 
-# 🎉 Félicitations
+# 🎉 Equipe : 
 
-Vous disposez maintenant d’un CRM complet, modulaire et extensible :
-
-- CLI professionnelle  
-- Backends interchangeables  
-- Config externe  
-- Persistance fiable  
-- Architecture propre et évolutive  
-
-N’hésitez pas à ajouter : export CSV, recherche, filtres, logs, tests…
+Fait par Loris NAVARRO & Gaëtan MAIRE
