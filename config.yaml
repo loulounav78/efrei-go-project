@@ -1,0 +1,5 @@
+storage:
+  type: gorm       
+  #ou type: json
+  db_path: data/contacts.db
+  json_path: data/contacts.json
